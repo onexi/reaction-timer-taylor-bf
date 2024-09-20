@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en"></html>
+<head></head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Add a Reaction Time</title>
+<style>
+    #startButton, #stopButton {
+        width: 150px;
+        height: 80px;
+        font-size: 18px;
+        margin: 10px;
+    }
+    #startButton {
+        background-color: green;
+    }
+    #stopButton {
+        background-color: red;
+    }
+    .frozen {
+        background-color: gray;
+    }
+</style>
+</head>
+<body>
+    <h1>The Best Reaction Timer on the Planet - according to Tom Hoyt</h1>
+    <input type="text" id="userName" placeholder="Enter your name" />
+    <button id="startButton" onclick="startReaction()">Start</button>
+    <button id="stopButton" onclick="stopReaction()" disabled>Stop</button>
+    <p id="statusMessage"></p>
+    
+
+<h2>Reaction Time Log</h2>
+<ul id="timesList"></ul>
+
+
+    <script src="script.js"></script>
+</body>
+</html>
