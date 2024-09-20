@@ -1,2 +1,105 @@
 <!DOCTYPE html>
 <html lang="en"></html>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reaction Timer</title>
+    <style>
+        #startStopButton {
+            width: 200px;
+            height: 100px;
+            font-size: 20px;
+        }
+        .waiting {
+            background-color: red;
+        }
+        .ready {
+            background-color: green;
+        }
+        .frozen {
+            background-color: gray;
+        }
+    </style>
+</head>
+<body>
+    <h1>Reaction Timer</h1>
+    <button id="startStopButton" class="waiting" onclick="handleButtonClick()">Start</button>
+    <p id="statusMessage"></p>
+
+    <script>
+        let startTime = 0;
+        let isWaiting = true;
+        let userId = Date.now();
+        let clickCount = 0;
+        let clickTimer;
+
+        function handleButtonClick() {
+            if (isWaiting) {
+                clickCount++;
+                // If clicked too rapidly, penalize
+                if (clickCount >= 3) {
+                    freezeUser();
+                } else {
+                    // Start the reaction timer
+                    startReactionTimer();
+                }
+            } else {
+                // Stop timer and calculate reaction time
+                let reactionTime = Date.now() - startTime;
+                sendReactionTime(reactionTime);
+            }
+        }
+
+        function startReactionTimer() {
+            document.getElementById('startStopButton').classList.add('waiting');
+            isWaiting = true;
+
+            // Random delay between 1 and 20 seconds
+            let randomDelay = Math.floor(Math.random() * 20000) + 1000;
+            
+            setTimeout(() => {
+                document.getElementById('startStopButton').classList.remove('waiting');
+                document.getElementById('startStopButton').classList.add('ready');
+                isWaiting = false;
+                startTime = Date.now();
+            }, randomDelay);
+        }
+
+        function sendReactionTime(reactionTime) {
+            fetch('/submit_time', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ user_id: userId, reaction_time: reactionTime }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'penalized') {
+                    freezeUser(data.time_left);
+                } else {
+                    document.getElementById('statusMessage').innerText = `Fastest time: ${data.fastest_time} ms`;
+                }
+            });
+        }
+
+        function freezeUser(timeLeft = 10) {
+            document.getElementById('startStopButton').classList.remove('waiting', 'ready');
+            document.getElementById('startStopButton').classList.add('frozen');
+            document.getElementById('startStopButton').disabled = true;
+            document.getElementById('statusMessage').innerText = `You are frozen for ${timeLeft} seconds`;
+
+            setTimeout(() => {
+                document.getElementById('startStopButton').disabled = false;
+                document.getElementById('startStopButton').classList.remove('frozen');
+                document.getElementById('startStopButton').classList.add('waiting');
+                document.getElementById('statusMessage').innerText = '';
+                clickCount = 0;
+            }, timeLeft * 1000);
+        }
+    </script>
+</body>
+</html>
